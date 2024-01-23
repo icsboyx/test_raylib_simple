@@ -34,6 +34,7 @@ The `main` function initializes the game, creates the entity and target, and ent
 ### ArrowKey Enum
 
 The `ArrowKey` enum and its associated methods are used to handle the arrow key inputs from the user.
+With a transcode to raylib keys.
 
 ```rust
 enum ArrowKey {
