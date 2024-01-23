@@ -1,17 +1,20 @@
-use raylib::{misc::AsF32, prelude::*};
+use rand::Rng;
+use raylib::{ffi::rand, prelude::*};
 
 struct Entity {
     x: f32,
     y: f32,
     radius: i32,
+    color: Color,
     canvas: (i32, i32),
 }
 impl Entity {
-    fn new(x: f32, y: f32, radius: i32, canvas: (i32, i32)) -> Self {
+    fn new(x: f32, y: f32, radius: i32, canvas: (i32, i32), color: Color) -> Self {
         Self {
             x,
             y,
             radius,
+            color,
             canvas,
         }
     }
@@ -40,16 +43,23 @@ impl Entity {
         }
     }
     fn draw(&self, d: &mut RaylibDrawHandle) {
-        d.draw_circle(self.x as i32, self.y as i32, self.radius as f32, Color::RED);
+        d.draw_circle(self.x as i32, self.y as i32, self.radius as f32, self.color);
     }
 }
 
 fn main() {
     let w = 640;
     let h = 480;
+    let mut rnd = rand::thread_rng();
 
-    let mut entity = Entity::new((h / 2) as f32, (w / 2) as f32, 40, (w, h));
-
+    let mut entity = Entity::new((h / 2) as f32, (w / 2) as f32, 40, (w, h), Color::RED);
+    let mut target = Entity::new(
+        rnd.gen_range(0..w - 20) as f32,
+        rnd.gen_range(0..h - 20) as f32,
+        20,
+        (w, h),
+        Color::BLUE,
+    );
     let (mut rl, thread) = raylib::init().size(w, h).title("Hello, World").build();
     enum ArrowKey {
         Up,
@@ -81,6 +91,8 @@ fn main() {
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::WHITE);
         entity.draw(&mut d);
+        target.draw(&mut d);
+
         for key in ArrowKey::get_arrows_keys() {
             if d.is_key_down(key.to_raylib_key()) {
                 match key {
@@ -90,6 +102,16 @@ fn main() {
                     ArrowKey::Right => entity.set_x(entity.get_x() + 1.0),
                 }
             }
+        }
+
+        if check_collision_circles(
+            Vector2::new(entity.get_x(), entity.get_y()),
+            entity.radius as f32,
+            Vector2::new(target.get_x(), target.get_y()),
+            target.radius as f32,
+        ) {
+            target.set_x(rnd.gen_range(0..w - 20) as f32);
+            target.set_y(rnd.gen_range(0..h - 20) as f32);
         }
     }
 }
