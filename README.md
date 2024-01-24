@@ -53,6 +53,12 @@ To run the game, you need to have Rust installed on your machine. You can then u
 
 Contributions are welcome. Please feel free to submit a pull request or open an issue.
 
+
+### Example
+https://github.com/icsboyx/test_raylib_simple/assets/92451526/5e0e63db-07ce-4796-9dd3-d36723d6ae81
+
+
+
 ## Special Thanks
 
 This project was inspired by the Twitch channel of:\
