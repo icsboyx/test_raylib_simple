@@ -1,6 +1,11 @@
 use rand::Rng;
-use raylib::prelude::*;
+use raylib::math::Vector2;
+use raylib::{
+    ffi::{CheckCollisionPointCircle, GetMouseX, GetMouseY, IsMouseButtonDown},
+    prelude::*,
+};
 
+#[derive(Debug)]
 struct Entity {
     x: f32,
     y: f32,
@@ -92,16 +97,16 @@ fn main() {
     let h = 480;
     let mut rnd = rand::thread_rng();
 
-    let mut entity = Entity::new((h / 2) as f32, (w / 2) as f32, 40, (w, h), Color::RED, 2.0);
+    let mut entity = Entity::new((h / 2) as f32, (w / 2) as f32, 40, (w, h), Color::RED, 4.0);
     let mut target = Entity::new(
-        rnd.gen_range(0..w - 20) as f32,
-        rnd.gen_range(0..h - 20) as f32,
+        rnd.gen_range(0..w - 10) as f32,
+        rnd.gen_range(0..h - 10) as f32,
         20,
         (w, h),
         Color::BLUE,
         0.0,
     );
-    let (mut rl, thread) = raylib::init().size(w, h).title("Hello, World").build();
+    let (mut rl, thread) = raylib::init().size(w, h).title("Rust Raylib Test").build();
     rl.set_target_fps(60);
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
@@ -124,6 +129,32 @@ fn main() {
         ) {
             target.set_x(rnd.gen_range(0..w - 20) as f32);
             target.set_y(rnd.gen_range(0..h - 20) as f32);
+        }
+
+        for entity in [&mut entity, &mut target] {
+            unsafe {
+                if IsMouseButtonDown(0)
+                    && CheckCollisionPointCircle(
+                        raylib::ffi::Vector2 {
+                            x: GetMouseX() as f32,
+                            y: GetMouseY() as f32,
+                        },
+                        raylib::ffi::Vector2 {
+                            x: entity.past_xy.0,
+                            y: entity.past_xy.1,
+                        },
+                        entity.radius as f32,
+                    )
+                {
+                    d.draw_text(
+                        &format!("Entity {:#?}", entity),
+                        GetMouseX(),
+                        GetMouseY(),
+                        10,
+                        Color::BLACK,
+                    )
+                }
+            }
         }
     }
 }
